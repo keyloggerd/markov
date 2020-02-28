@@ -34,7 +34,7 @@ class MarkovNode(object):
 
 
 class MarkovNodeList():
-    BARRIER = "SENTENCE_BARRIER"
+    BARRIER = "<break>"
 
     def __init__(self):
         # dict of { "word": MarkovNode }
