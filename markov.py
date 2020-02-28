@@ -91,10 +91,12 @@ def generate(mnl, length):
     print(out)
 
 
-mnl1 = ingest_file("alice.txt")
-generate(mnl1, 100)
+def main():
+    mnl1 = ingest_file("alice.txt")
+    generate(mnl1, 100)
 
 
+# rudimentary tests --------------------------
 # test MarkovNode
 m = MarkovNode("test")
 m.increase_link("anna")
@@ -120,3 +122,6 @@ mnl.increase_link("poke", "jared")
 mnl.increase_link("jared", MarkovNodeList.BARRIER)
 
 assert mnl.words["poke"].next_words == {"anna": 1, "jared": 1}
+
+
+main()
