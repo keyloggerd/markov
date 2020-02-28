@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
+import pickle
 import random
 import re
+import os
 
 random.seed()
+
+MARKOV_NODE_LIST_FILE = 'markov_node_list.pkl'
 
 
 class MarkovNode(object):
@@ -28,7 +32,7 @@ class MarkovNode(object):
     def choose_next(self):
         select = []
         for word in self.next_words:
-            for i in range(self.next_words[word]):
+            for _ in range(self.next_words[word]):
                 select.append(word)
         return select[random.randint(0, len(select)-1)]
 
@@ -58,47 +62,58 @@ class MarkovNodeList():
     def get_words_of_length(self, length):
         return [a for a in self.words.keys() if len(a) == length]
 
+    def ingest_file(self, file_name):
+        with open(file_name) as f:
+            content = f.read()
 
-def ingest_file(file_name):
-    with open(file_name) as f:
-        content = f.read()
+        content = content.lower()
+        content = re.sub(r'([^a-z0-9\'\. ])', r' ', content)
+        content = re.sub(r'(\b\' | \'\b)', r' ', content)
+        content = re.sub(r'\.', r' . ', content)
 
-    content = content.lower()
-    content = re.sub(r'([^a-z0-9\'\. ])', r' ', content)
-    content = re.sub(r'(\b\' | \'\b)', r' ', content)
-    content = re.sub(r'\.', r' . ', content)
+        words = content.split()
+        prev_word = MarkovNodeList.BARRIER
+        for cur_word in words:
+            if cur_word == '.':
+                self.increase_link(prev_word, MarkovNodeList.BARRIER)
+                prev_word = MarkovNodeList.BARRIER
+            else:
+                self.increase_link(prev_word, cur_word)
+                prev_word = cur_word
 
-    words = content.split()
-    myMNL = MarkovNodeList()
-    prev_word = MarkovNodeList.BARRIER
-    for cur_word in words:
-        if cur_word == '.':
-            myMNL.increase_link(prev_word, MarkovNodeList.BARRIER)
-            prev_word = MarkovNodeList.BARRIER
-        else:
-            myMNL.increase_link(prev_word, cur_word)
-            prev_word = cur_word
-    return myMNL
+    def generate(self, length):
+        cur_word = MarkovNodeList.BARRIER
+        out = ""
+        for _ in range(length):
+            next_word = self.words[cur_word].choose_next()
+            out += next_word + " "
+            cur_word = next_word
+        return out
 
+    @staticmethod
+    def load(file_name):
+        with open(file_name, 'rb') as input:
+            return pickle.load(input)
 
-def generate(mnl, length):
-    cur_word = MarkovNodeList.BARRIER
-    out = ""
-    for _ in range(length):
-        next_word = mnl.words[cur_word].choose_next()
-        out += next_word + " "
-        cur_word = next_word
-    print(out)
+    def save(self):
+        with open('markov_node_list.pkl', 'wb') as output:
+            pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
 
 def main():
-    mnl1 = ingest_file("alice.txt")
-    generate(mnl1, 100)
+    mnl1 = MarkovNodeList.load(MARKOV_NODE_LIST_FILE)
+    for file in os.listdir('gutenberg'):
+        print(file)
+
+        mnl1.ingest_file('gutenberg/' + file)
+    # mnl1.ingest_file("alice.txt")
+    print(mnl1.generate(100))
+    print(mnl1)
 
 
 # rudimentary tests --------------------------
 # test MarkovNode
-m = MarkovNode("test")
+m=MarkovNode("test")
 m.increase_link("anna")
 m.increase_link("anna")
 m.increase_link("anna")
@@ -112,7 +127,7 @@ assert m.next_words["jared"] == 2
 assert m.link_total() == 5
 
 # test MarkovNodeList
-mnl = MarkovNodeList()
+mnl=MarkovNodeList()
 mnl.increase_link(MarkovNodeList.BARRIER, "poke")
 mnl.increase_link("poke", "anna")
 mnl.increase_link("anna", "and")
