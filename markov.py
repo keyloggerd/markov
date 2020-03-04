@@ -102,12 +102,6 @@ class MarkovNodeList():
 
 def main():
     mnl1 = MarkovNodeList.load(MARKOV_NODE_LIST_FILE)
-    for file in os.listdir('gutenberg'):
-        print(file)
-
-        mnl1.ingest_file('gutenberg/' + file)
-    # mnl1.ingest_file("alice.txt")
-    print(mnl1.generate(100))
     print(mnl1)
 
 
