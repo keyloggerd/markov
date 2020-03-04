@@ -29,12 +29,28 @@ class MarkovNode(object):
     def link_total(self):
         return sum(self.next_words.values(), 0)
 
-    def choose_next(self):
-        select = []
+    def get_options(self, word_len=None):
+        result = {}
         for word in self.next_words:
-            for _ in range(self.next_words[word]):
-                select.append(word)
-        return select[random.randint(0, len(select)-1)]
+            if word_len is None or len(word) == word_len:
+                result[word] = self.next_words[word]
+        if len(result) == 0:
+            if word_len > 1:
+                return self.get_options(word_len-1) + self.get_options(word_len+1)
+            else:
+                return self.get_options(word_len+1)
+        else:
+            return result
+
+    def choose_next(self, length=None):
+        select = self.get_options(length)
+        result = ""
+        max_value = 0
+        for i in select:
+            if select[i] > max_value:
+                max_value = select[i]
+                result = i
+        return result
 
 
 class MarkovNodeList():
@@ -81,11 +97,11 @@ class MarkovNodeList():
                 self.increase_link(prev_word, cur_word)
                 prev_word = cur_word
 
-    def generate(self, length):
+    def generate(self, lengths):
         cur_word = MarkovNodeList.BARRIER
         out = ""
-        for _ in range(length):
-            next_word = self.words[cur_word].choose_next()
+        for i in range(len(lengths)):
+            next_word = self.words[cur_word].choose_next(lengths[i])
             out += next_word + " "
             cur_word = next_word
         return out
