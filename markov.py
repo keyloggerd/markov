@@ -8,6 +8,30 @@ random.seed()
 
 MARKOV_NODE_LIST_FILE = 'markov_node_list.pkl'
 
+'''
+LETTERS
+
+first index means finger number - 1 is index finger, 4 is pinkie, 0 is letters
+that should be index but are in the middle region of the keyboard
+'''
+
+LEFT_LETTERS = [
+    ['t', 'g', 'b'],
+    ['r', 'f', 'v'],
+    ['e', 'd', 'c'],
+    ['w', 's', 'x'],
+    ['q', 'a', 'z']
+]
+
+RIGHT_LETTERS = [
+    ['y', 'h', 'n'],
+    ['u', 'j', 'm'],
+    ['i', 'k'],
+    ['o', 'l', '.'],
+    ['p']
+]
+
+ALL_LETTERS = [l + r for (l, r) in zip(LEFT_LETTERS, RIGHT_LETTERS)]
 
 class MarkovNode(object):
     def __init__(self, word):
@@ -119,11 +143,12 @@ class MarkovNodeList():
 def main():
     mnl1 = MarkovNodeList.load(MARKOV_NODE_LIST_FILE)
     print(mnl1)
+    print(mnl1.generate([4, 2, 5, 3, 1]))
 
 
 # rudimentary tests --------------------------
 # test MarkovNode
-m=MarkovNode("test")
+m = MarkovNode("test")
 m.increase_link("anna")
 m.increase_link("anna")
 m.increase_link("anna")
@@ -137,7 +162,7 @@ assert m.next_words["jared"] == 2
 assert m.link_total() == 5
 
 # test MarkovNodeList
-mnl=MarkovNodeList()
+mnl = MarkovNodeList()
 mnl.increase_link(MarkovNodeList.BARRIER, "poke")
 mnl.increase_link("poke", "anna")
 mnl.increase_link("anna", "and")
