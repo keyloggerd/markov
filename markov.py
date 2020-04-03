@@ -7,6 +7,9 @@ import os
 random.seed()
 
 MARKOV_NODE_LIST_FILE = 'markov_node_list.pkl'
+LEFT = "LEFT"
+RIGHT = "RIGHT"
+ALL = "ALL"
 
 '''
 LETTERS
@@ -14,7 +17,6 @@ LETTERS
 first index means finger number - 1 is index finger, 4 is pinkie, 0 is letters
 that should be index but are in the middle region of the keyboard
 '''
-
 LEFT_LETTERS = [
     ['t', 'g', 'b'],
     ['r', 'f', 'v'],
@@ -32,6 +34,28 @@ RIGHT_LETTERS = [
 ]
 
 ALL_LETTERS = [l + r for (l, r) in zip(LEFT_LETTERS, RIGHT_LETTERS)]
+
+LETTERS = {LEFT: LEFT_LETTERS, RIGHT: RIGHT_LETTERS, ALL: ALL_LETTERS}
+
+
+def get_hand_and_finger_of_letter(letter):
+    return (get_hand_of_letter(letter), get_finger_of_letter)
+
+
+def get_hand_of_letter(letter):
+    assert letter in 'qwertyuiopasdfghjklzxcvbnm.'
+    assert len(letter) == 1
+    for key in LETTERS:
+        for finger in LETTERS[key]:
+            if letter in finger:
+                return key
+
+
+def get_finger_of_letter(letter):
+    for i in range(len(LETTERS[ALL])):
+        if letter in LETTERS[ALL][i]:
+            return i
+
 
 class MarkovNode(object):
     def __init__(self, word):
@@ -147,6 +171,14 @@ def main():
 
 
 # rudimentary tests --------------------------
+# test hand/finger stuff
+assert get_hand_of_letter('a') == LEFT
+assert get_hand_of_letter('j') == RIGHT
+assert get_finger_of_letter('a') == 4
+assert get_finger_of_letter('i') == 2
+assert get_finger_of_letter('y') == 0
+
+
 # test MarkovNode
 m = MarkovNode("test")
 m.increase_link("anna")
@@ -172,6 +204,5 @@ mnl.increase_link("poke", "jared")
 mnl.increase_link("jared", MarkovNodeList.BARRIER)
 
 assert mnl.words["poke"].next_words == {"anna": 1, "jared": 1}
-
 
 main()
