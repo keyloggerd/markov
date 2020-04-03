@@ -90,15 +90,33 @@ class MarkovNode(object):
         else:
             return result
 
-    def choose_next(self, length=None):
-        select = self.get_options(length)
-        result = ""
-        max_value = 0
-        for i in select:
-            if select[i] > max_value:
-                max_value = select[i]
-                result = i
-        return result
+    def choose_next(self, choose_param=None):
+        if type(choose_param) is list:
+            select = self.get_options(len(choose_param))
+            result = ""
+            max_value = 0
+            for option in select:
+                assert len(choose_param) == len(option)
+                cont = False
+                for i in range(len(choose_param)):
+                    if choose_param[i] != get_finger_of_letter(option[i]):
+                        cont = True
+                if cont:
+                    continue
+                if select[option] > max_value:
+                    max_value = select[option]
+                    result = option
+            assert result != ""
+            return result
+        else:
+            select = self.get_options(choose_param)
+            result = ""
+            max_value = 0
+            for i in select:
+                if select[i] > max_value:
+                    max_value = select[i]
+                    result = i
+            return result
 
 
 class MarkovNodeList():
@@ -167,7 +185,7 @@ class MarkovNodeList():
 def main():
     mnl1 = MarkovNodeList.load(MARKOV_NODE_LIST_FILE)
     print(mnl1)
-    print(mnl1.generate([4, 2, 5, 3, 1]))
+    print(mnl1.generate([[4, 0, 3, 2], 2, 5, 3, 1]))
 
 
 # rudimentary tests --------------------------
