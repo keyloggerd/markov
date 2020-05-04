@@ -1,0 +1,9 @@
+digraph dot{
+<break> -> poke[label=1];
+poke -> anna[label=1];
+poke -> jared[label=1];
+anna -> and[label=1];
+and -> then[label=1];
+then -> poke[label=1];
+jared -> <break>[label=1];
+}

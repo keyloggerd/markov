@@ -77,22 +77,39 @@ class MarkovNode(object):
     def link_total(self):
         return sum(self.next_words.values(), 0)
 
-    def get_options(self, word_len=None):
+    def get_options(self, word_len=None, recurse=True):
         result = {}
         for word in self.next_words:
             if word_len is None or len(word) == word_len:
                 result[word] = self.next_words[word]
-        if len(result) == 0:
-            if word_len > 1:
-                return self.get_options(word_len-1) + self.get_options(word_len+1)
-            else:
-                return self.get_options(word_len+1)
+        if len(result) == 0 and recurse == True:
+            try:
+                if word_len > 1:
+                    less = self.get_options(word_len-1, False)
+                    more = self.get_options(word_len+1, False)
+                    if less is None and more is not None:
+                        return more
+                    if less is not None and more is None:
+                        return less
+                    if less is not None and more is not None:
+                        return dict(list(less.items()) + list(more.items()))
+                    else:
+                        return None
+                else:
+                    return self.get_options(word_len+1, False)
+            except RecursionError:
+                return None
         else:
-            return result
+            if result == {}:
+                return None
+            else:
+                return result
 
     def choose_next(self, choose_param=None):
         if type(choose_param) is list:
             select = self.get_options(len(choose_param))
+            if select is None:
+                return None
             result = ""
             max_value = 0
             for option in select:
@@ -106,10 +123,15 @@ class MarkovNode(object):
                 if select[option] > max_value:
                     max_value = select[option]
                     result = option
-            assert result != ""
-            return result
+            try:
+                assert result != ""
+                return result
+            except AssertionError:
+                return self.choose_next(len(choose_param))
         else:
             select = self.get_options(choose_param)
+            if select is None:
+                return None
             result = ""
             max_value = 0
             for i in select:
@@ -117,6 +139,10 @@ class MarkovNode(object):
                     max_value = select[i]
                     result = i
             return result
+
+    def make_graph_edge(self, f):
+        for next_word, next_word_value in self.next_words.items():
+            f.write(self.word.replace('\'', '') + ' -> ' + next_word.replace('\'', '') + '[label=' + str(next_word_value) + '];\n')
 
 
 class MarkovNodeList():
@@ -168,8 +194,12 @@ class MarkovNodeList():
         out = ""
         for i in range(len(lengths)):
             next_word = self.words[cur_word].choose_next(lengths[i])
-            out += next_word + " "
-            cur_word = next_word
+            if next_word is None:
+                cur_word = MarkovNodeList.BARRIER
+                out += ". "
+            else:
+                out += next_word + " "
+                cur_word = next_word
         return out
 
     @staticmethod
@@ -181,11 +211,21 @@ class MarkovNodeList():
         with open('markov_node_list.pkl', 'wb') as output:
             pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
+    def make_graph(self, file_name='markov.dot'):
+        with open(file_name, 'w') as f:
+            f.write("digraph " + 'dot' + "{\n")
+            for mn in self.words:
+                self.words[mn].make_graph_edge(f)
+            f.write("}")
+            f.close()
 
 def main():
-    mnl1 = MarkovNodeList.load(MARKOV_NODE_LIST_FILE)
+    mnl1 = MarkovNodeList()
+    mnl1.ingest_file('democracy.txt')
     print(mnl1)
-    print(mnl1.generate([[4, 0, 3, 2], 2, 5, 3, 1]))
+    mnl1.make_graph(file_name='democracy.dot')
+    print(mnl1.generate([3, 5, 8, 2, 1, 8]))
+    print(mnl1.generate([[4, 0, 3, 2], [0, 3], 5, 3, 1]))
 
 
 # rudimentary tests --------------------------
@@ -220,6 +260,7 @@ mnl.increase_link("and", "then")
 mnl.increase_link("then", "poke")
 mnl.increase_link("poke", "jared")
 mnl.increase_link("jared", MarkovNodeList.BARRIER)
+mnl.make_graph('poke.dot')
 
 assert mnl.words["poke"].next_words == {"anna": 1, "jared": 1}
 

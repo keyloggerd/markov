@@ -1,0 +1,21 @@
+The above article is a contemporary musing on the 2004 presidential election and
+the effect of electronic voting on public perceptions of elections. The article
+opens by discussing the 2000 Presidential election in Florida, in which
+punch-card voting was very close and led to recounts and controversy. It goes on
+to discuss the Help America Vote Act , which encouraged and provided
+funding for states to upgrade to more technology-forward voting systems. One
+such system was used in a 2003 Indiana election and produced 144000 votes from
+only 5352 voters. These discrepancies suggest we should consider the legitimacy
+and security of electronic voting methods.
+
+In the reading "Why Technology Hasn't Delivered More Democracy", Larry Diamond
+makes the point that "Autocrats know how to use technology," and I would point
+out that so do others. Between foreign powers with deep pockets and more local
+hackers with personal motivations, there is no shortage of people who might be
+interested in hacking and manipulating any electronic voting system to bend it
+to their will. And as Senem Aydin Duzgit points out, "limits on technology
+persist" - no amount of laws or legislation will be able to truly control
+software or hardware vulnerabilities. Only engineering and proper care can do
+that. If technology in the realm of voting-the central tenet of all democracy-is
+to be trusted and worthwhile, it will need to be rigorously protected and tested
+or it will only be a detriment to democracy.
